@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purple Passion Fruit Ripeness Classifier</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?display=swap&family=Manrope:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900"
+    />
+    <style>
+      body {
+        font-family: 'Manrope', 'Noto Sans', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2.5rem;
+        border-bottom: 1px solid #ddd;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #131712;
+      }
+      .nav {
+        display: none;
+      }
+      .nav a {
+        margin-right: 2rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #131712;
+      }
+      .profile {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .profile button {
+        background: #f1f4f1;
+        border: none;
+        border-radius: 8px;
+        height: 40px;
+        width: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .profile-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-size: cover;
+        background-position: center;
+      }
+      main {
+        flex: 1;
+        padding: 1.5rem 10vw;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      .hero {
+        min-height: 100px;
+        color: white;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        padding: 2rem;
+        border-radius: 10px;
+        background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.4)),
+          url('https://lh3.googleusercontent.com/aida-public/AB6AXuDxDfG1vsbtZOfuc69jrNoq7jqgMMvUWknUvB_7wVel32mG1Ns2UiR7JC8UxhsZ63igIIeOBVGbND224VLKGUcIYNvinmre4sV01_ajWdellP4de2Spd_vU7SDqSAGVSYXcn92RbckslJRuTkdHCUz90qdM6aZKJQTtF-bHM7uIeLQWv3rYQXtYvGUKEuvnXrlkVzDbz8pYGkxfhMm6uG67FuIMyGBsgaoqZnFihB8-9wj4JkIho7cIj2nUC2ZgUySffRPmtxedFg');
+        background-size: cover;
+        background-position: center;
+      }
+      .hero button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin: 0.25rem;
+        cursor: pointer;
+      }
+      .btn-green {
+        background: #53d22c;
+        color: #131712;
+      }
+      .btn-light {
+        background: #f1f4f1;
+        color: #131712;
+      }
+      .section-box {
+        border: 2px dashed #dee4dc;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+      .predict-box {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        background-color: white;
+        max-width: 600px;
+        margin: auto;
+        align-items: center;
+        position: relative;
+      }
+
+      .predict-box .result-img {
+        width: 180px;
+        height: 140px;
+        border-radius: 8px;
+        background-size: cover;
+        background-position: center;
+        flex-shrink: 0;
+      }
+
+      .predict-box .text-content {
+        flex: 1;
+      }
+
+      .predict-box .close-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #eee;
+        border: none;
+        border-radius: 999px;
+        font-size: 1rem;
+        cursor: pointer;
+        width: 24px;
+        height: 24px;
+        line-height: 20px;
+        text-align: center;
+      }
+      .prediction-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.5rem;
+      }
+
+      .predict-box {
+        flex: 0 1 calc(50% - 1rem); /* Maksimal 2 per baris */
+        background: #f0fdf4;
+        padding: 1rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        min-width: 300px;
+        max-width: 400px;
+      }
+
+      @media (max-width: 640px) {
+        .predict-box {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .predict-box .result-img {
+          width: 100%;
+          height: 180px;
+        }
+
+        .predict-box .text-content {
+          padding-top: 0.5rem;
+        }
+
+        .predict-box .close-btn {
+          top: 4px;
+          right: 4px;
+        }
+      }
+      .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #eee;
+        border: none;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+      }
+      .result-img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background-size: cover;
+        background-position: center;
+        border-radius: 10px;
+      }
+      footer {
+        text-align: center;
+        padding: 2rem;
+        font-size: 0.875rem;
+        color: #6d8566;
+      }
+      @media (min-width: 768px) {
+        .nav {
+          display: flex;
+          gap: 2rem;
+        }
+        .predict-box {
+          flex-direction: row;
+        }
+        .result-img {
+          width: 50%;
+        }
+        .predict-box .text-content {
+          width: 50%;
+        }
+        
+      }
+      .upload-box {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+      }
+
+      .upload-btn {
+        background: #4f8ef7;
+        color: white;
+        font-size: 1rem;
+        padding: 0.85rem 1.6rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s ease;
+        box-shadow: 0 4px 12px rgba(79, 142, 247, 0.3);
+        user-select: none;
+      }
+      .upload-btn:hover {
+        background: #397be5;
+      }
+
+      .upload-hint {
+        margin-top: 1.2rem;
+        font-size: 0.9rem;
+        color: #777;
+        line-height: 1.5;
+      }
+      .upload-hint kbd {
+        background: #f3f3f3;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        border: 1px solid #ccc;
+        font-family: 'Menlo', monospace;
+      }
+      .btn-primary {
+        background-color: #4f8ef7;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(79, 142, 247, 0.3);
+        transition: background-color 0.2s ease;
+      }
+      .btn-primary:hover {
+        background-color: #397be5;
+      }
+    </style>
+  </head>
+  <body id="top">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+  
+      header {
+        position: sticky;
+        top: 0;
+        background: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 24px;
+        z-index: 1000;
+        border-bottom: 1px solid #eee;
+      }
+  
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+  
+      .logo-icon {
+        width: 20px;
+        height: 20px;
+        color: #000;
+      }
+  
+      .logo-text {
+        font-size: 1rem;
+        font-weight: bold;
+        line-height: 1.2;
+      }
+  
+      nav {
+        display: flex;
+        gap: 20px;
+      }
+  
+      nav a {
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+      }
+  
+      .hamburger {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        gap: 5px;
+      }
+  
+      .hamburger span {
+        width: 25px;
+        height: 3px;
+        background: #000;
+        transition: all 0.3s ease;
+      }
+  
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 2000;
+      }
+  
+      .overlay-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .overlay-content a {
+        color: white;
+        font-size: 1.5rem;
+        margin: 15px 0;
+        text-decoration: none;
+      }
+      /* Responsive */
+      @media (max-width: 768px) {
+        nav {
+          display: none;
+        }
+  
+        .hamburger {
+          display: flex;
+        }
+  
+        .overlay.show {
+          display: flex;
+        }
+  
+        .hamburger.active span:nth-child(1) {
+          transform: rotate(45deg) translate(5px, 5px);
+        }
+  
+        .hamburger.active span:nth-child(2) {
+          opacity: 0;
+        }
+  
+        .hamburger.active span:nth-child(3) {
+          transform: rotate(-45deg) translate(5px, -5px);
+        }
+      }
+      @media (max-width: 768px) {
+      .upload-hint {
+        display: none;
+        }
+      }
+      .text-desktop {
+        display: inline;
+      }
+      .text-mobile {
+        display: none;
+      }
+      @media (max-width: 768px) {
+        .text-desktop {
+          display: none;
+        }
+        .text-mobile {
+          display: inline;
+        }
+      }
+
+    </style>
+    <header>
+      <div class="logo">
+        <div class="logo-icon">
+          <!-- SVG icon -->
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <h2 class="logo-text">PPFR Classifier</h2>
+      </div>
+  
+      <nav>
+        <a href="#top">Home</a>
+        <a href="#about">Contact</a>
+      </nav>
+  
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+  
+      <div class="overlay" id="overlay">
+        <div class="overlay-content">
+          <a href="#top">Home</a>
+          <a href="#about">Contact</a>
+        </div>
+      </div>
+    </header>
+  
+    
+    <main>
+      <section class="hero">
+        <h1 style="font-size: 2rem; font-weight: 900;">Check Your Purple Passion Fruit's Ripeness</h1>
+        <p>AI-based image recognition to determine ripeness instantly.</p>
+      </section>
+
+      <section class="upload-box" id="drop-area">
+        <input type="file" id="image-upload" accept="image/*" hidden />
+        <label for="image-upload" class="upload-btn" id="upload-label">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 
+                     10-4.48 10-10S17.52 2 12 2zm1 14.5h-2v-2h2v2zm0-4h-2V7h2v5.5z"/>
+          </svg>
+          <span class="text-desktop">Upload or Drag Image Here</span>
+          <span class="text-mobile">Upload Image Here</span>
+        </label>
+        <p class="upload-hint desktop-only">You can also drag & drop the image here.<br>Or press <kbd>Ctrl</kbd> + <kbd>V</kbd> to paste.</p>
+        <div id="preview-container" style="margin-top: 1rem;"></div>
+        <div id="upload-feedback" style="margin-top: 0.5rem; color: red; font-size: 0.85rem;"></div>
+      </section>
+      
+      <div style="text-align: center;">
+        <button class="btn-primary" id="predict-button">Predict Ripeness</button>
+      </div>
+
+      <div class="prediction-grid">
+
+        <!-- Prediction Box 1 -->
+        <section class="predict-box" data-dummy="true">
+          <button class="close-btn" onclick="this.parentElement.style.display='none'">×</button>
+          <div class="result-img" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCiSJUTvBpfL6aWRoDHx2RVsxqK-r9d7xa8jZGvYhOuMbArsC_dsjSDOyVqnPCle-vI45c5oCfO3VtyRdItp7MJLBRCNz1lqOAoxBiQDJEsuCB5nJP-zMYKdFwRGxGtEKgRMpxEO-jZO_GC6UZ-aM3260JLmjzXTFO50uVsq61fCLt8wiDr3ySjFZejRDZCnN8HRbmQ72kI2_VRQneRby8rh2IGd1chQank3Iqzo0SV2KBZWNVgHKxnJbUvoKtHMy4toGTYhvvF7w');"></div>
+          <div class="text-content">
+            <h3 style="font-size: 1.125rem; font-weight: bold;">Prediction Result</h3>
+            <p style="color: #6d8566; font-size: 1rem;">Ripe</p>
+            <p style="color: #6d8566; font-size: 0.875rem;">Accuracy: 95% - The fruit is ripe, has a deep purple color and slightly wrinkled skin.</p>
+          </div>
+        </section>
+
+      
+      </div>
+
+      <section>
+        <h2 style="font-size: 1.25rem; font-weight: bold;">About Purple passion fruit</h2>
+        <p style="font-size: 0.875rem; color: #131712; margin-top: 0.5rem; text-align: justify;">
+          Purple passion fruit, also known as Passiflora edulis Sims, is the most commonly cultivated passion fruit variety for its juice This fruit is oval round, when young the skin of purple passion fruit is green, and will turn dark purple when ripe. Purple passion fruit is often used in processed products such as juice and syrup. Purple passion fruit has excellent nutritional content, because this fruit contains nutrients that are very beneficial for health, such as antioxidant compounds, vitamin A, vitamin C, fiber, flavonoids, and β-carotene.
+        </p>
+      </section>
+      <section id="about" style="padding: 2rem 0; text-align: center;">
+        <h2 style="font-size: 1.25rem; font-weight: bold;">About Me</h2>
+        <p style="font-size: 0.875rem; color: #131712; margin: 0.5rem 0 1.5rem;">
+          Connect with me on social media
+        </p>
+        <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+          <a href="https://github.com/username" target="_blank" style="color: #131712;" aria-label="GitHub">
+            <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 .5C5.648.5.5 5.648.5 12a11.5 11.5 0 008.042 10.955c.59.11.808-.255.808-.567 0-.28-.01-1.023-.015-2.01-3.274.711-3.964-1.579-3.964-1.579-.536-1.362-1.31-1.724-1.31-1.724-1.07-.732.081-.717.081-.717 1.183.084 1.806 1.215 1.806 1.215 1.05 1.8 2.755 1.28 3.428.979.105-.761.41-1.28.746-1.574-2.613-.296-5.357-1.307-5.357-5.815 0-1.285.46-2.334 1.215-3.156-.12-.297-.526-1.49.115-3.105 0 0 .99-.317 3.24 1.207a11.19 11.19 0 012.95-.397c1 .004 2.01.136 2.95.397 2.25-1.524 3.24-1.207 3.24-1.207.641 1.615.235 2.808.115 3.105.756.822 1.215 1.87 1.215 3.156 0 4.52-2.75 5.515-5.37 5.805.42.36.795 1.072.795 2.162 0 1.561-.015 2.818-.015 3.201 0 .316.21.684.825.567A11.502 11.502 0 0023.5 12c0-6.352-5.148-11.5-11.5-11.5z"/>
+            </svg>
+          </a>
+      
+          <a href="https://linkedin.com/in/username" target="_blank" style="color: #131712;" aria-label="LinkedIn">
+            <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M4.98 3.5C3.34 3.5 2 4.84 2 6.48s1.34 2.98 2.98 2.98a2.99 2.99 0 002.98-2.98A2.99 2.99 0 004.98 3.5zM2.4 21.5h5.2V9H2.4v12.5zM9.6 9v12.5h5.2v-6.5c0-3.6 4.8-3.9 4.8 0v6.5h5.2V13c0-7.2-8.4-6.9-10.4-3.4V9H9.6z"/>
+            </svg>
+          </a>
+      
+          <a href="https://instagram.com/username" target="_blank" style="color: #131712;" aria-label="Instagram">
+            <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2.2c3.2 0 3.6 0 4.8.1 1.1.1 1.7.3 2.1.5.5.2.9.5 1.3.9.4.4.7.8.9 1.3.2.4.4 1 .5 2.1.1 1.2.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.1-.3 1.7-.5 2.1-.2.5-.5.9-.9 1.3-.4.4-.8.7-1.3.9-.4.2-1 .4-2.1.5-1.2.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.1-.1-1.7-.3-2.1-.5a3.9 3.9 0 01-2.2-2.2c-.2-.4-.4-1-.5-2.1-.1-1.2-.1-1.6-.1-4.8s0-3.6.1-4.8c.1-1.1.3-1.7.5-2.1a3.9 3.9 0 012.2-2.2c.4-.2 1-.4 2.1-.5 1.2-.1 1.6-.1 4.8-.1M12 0C8.7 0 8.3 0 7.1.1c-1.3.1-2.2.3-3 .7a6.1 6.1 0 00-2.2 2.2c-.4.8-.6 1.7-.7 3C1 8.3 1 8.7 1 12c0 3.3 0 3.7.1 4.9.1 1.3.3 2.2.7 3a6.1 6.1 0 002.2 2.2c.8.4 1.7.6 3 .7 1.2.1 1.6.1 4.9.1s3.7 0 4.9-.1c1.3-.1 2.2-.3 3-.7a6.1 6.1 0 002.2-2.2c.4-.8.6-1.7.7-3 .1-1.2.1-1.6.1-4.9s0-3.7-.1-4.9c-.1-1.3-.3-2.2-.7-3a6.1 6.1 0 00-2.2-2.2c-.8-.4-1.7-.6-3-.7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 100 12.4 6.2 6.2 0 000-12.4zm0 10.2a4 4 0 110-8 4 4 0 010 8zm6.4-11.8a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/>
+            </svg>
+          </a>
+      
+          <a href="mailto:email@example.com" style="color: #131712;" aria-label="Email">
+            <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 13.1L2 6.6V18h20V6.6l-10 6.5zM12 11L2 4h20L12 11z"/>
+            </svg>
+          </a>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p>© 2025 Purple Passion Fruit Classifier. Developed by Gani Alfa.</p>
+    </footer>
+    <script>
+      const hamburger = document.getElementById('hamburger');
+      const overlay = document.getElementById('overlay');
+    
+      hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        overlay.classList.toggle('show');
+      });
+    
+      // Tutup overlay saat salah satu link diklik
+      document.querySelectorAll('.overlay-content a').forEach(link => {
+        link.addEventListener('click', () => {
+          overlay.classList.remove('show');
+          hamburger.classList.remove('active');
+        });
+      });
+    </script>
+    <script>
+      const dropArea = document.getElementById("drop-area");
+      const fileInput = document.getElementById("image-upload");
+      const previewContainer = document.getElementById("preview-container");
+      const feedback = document.getElementById("upload-feedback");
+      const predictButton = document.getElementById("predict-button");
+    
+      // Preview image
+      function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewContainer.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 200px; border-radius: 8px;" />`;
+        };
+        reader.readAsDataURL(file);
+      }
+    
+      // File selected
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith("image/")) {
+          showPreview(file);
+          feedback.textContent = "";
+        } else {
+          feedback.textContent = "Please upload a valid image file.";
+        }
+      });
+    
+      // Drag and Drop
+      dropArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropArea.style.border = "2px dashed #4f8ef7";
+      });
+    
+      dropArea.addEventListener("dragleave", () => {
+        dropArea.style.border = "none";
+      });
+    
+      dropArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropArea.style.border = "none";
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("image/")) {
+          fileInput.files = e.dataTransfer.files;
+          showPreview(file);
+          feedback.textContent = "";
+        } else {
+          feedback.textContent = "Only image files are allowed.";
+        }
+      });
+    
+      // Predict Button Validation
+      predictButton.addEventListener("click", () => {
+      if (!fileInput.files || fileInput.files.length === 0) {
+        feedback.textContent = "Please upload an image before predicting.";
+        previewContainer.innerHTML = "";
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      feedback.textContent = "Predicting...";
+      fetch("/predict", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          feedback.textContent = data.error;
+          return;
+        }
+      // Tangani kasus "unknown"
+      if (data.label.toLowerCase() === "unknown") {
+        feedback.textContent = "The picture uploaded is not purple passion fruit";
+        return;
+      }
+
+      const dummyBox = document.querySelector('.prediction-grid .predict-box[data-dummy="true"]');
+      if (dummyBox) dummyBox.remove();
+
+        // Menampilkan hasil prediksi
+        document.querySelector(".prediction-grid").insertAdjacentHTML("beforeend", `
+          <section class="predict-box">
+            <button class="close-btn" onclick="this.parentElement.style.display='none'">×</button>
+            <div class="result-img" style="background-image: url('${data.image_url}');"></div>
+            <div class="text-content">
+              <h3 style="font-size: 1.125rem; font-weight: bold;">Prediction Result</h3>
+              <p style="font-size: 1rem;">${data.label}</p>
+              <p style="font-size: 0.875rem;">Akurasi: ${data.confidence.toFixed(2)}%</p>
+            </div>
+          </section>
+        `);
+        feedback.textContent = "";
+        fileInput.value = "";
+        previewContainer.innerHTML = "";
+      })
+      .catch(err => {
+        feedback.textContent = "Prediction failed.";
+        console.error(err);
+      });
+    });
+
+      // Paste from clipboard
+      document.addEventListener('paste', function (e) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.type.indexOf("image") !== -1) {
+            const file = item.getAsFile();
+            if (file) {
+              fileInput.files = new DataTransfer().files; // Reset file input
+              const dataTransfer = new DataTransfer();
+              dataTransfer.items.add(file);
+              fileInput.files = dataTransfer.files;
+
+              showPreview(file);
+              feedback.textContent = "";
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
